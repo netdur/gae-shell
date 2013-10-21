@@ -1,0 +1,57 @@
+<div class="container" id="app">
+	<style>
+	.done {
+		text-decoration: line-through;
+	}
+	.task {
+		margin-bottom: 6px;
+	}
+	</style>
+	<h1>What do you want to do today?</h1>
+	<form class="form-inline" role="form" action="/todo" method="post">
+		<div class="form-group col-lg-10">
+			<input type="text" class="form-control input-lg" name="title" placeholder="Buy Milk">
+		</div>
+		<button id="add-task" type="submit" class="btn btn-primary btn-lg">Add</button>
+	</form>
+	<script>
+	$(function() {
+		function changes() {
+			var ig = $(this).parent();
+			if (!ig.hasClass("input-group")) {
+				ig = ig.parent();
+			}
+			var id = $("input[type=text]", ig).attr("data-id");
+			var checked = $("input[type=checkbox]", ig)[0];
+			var title = $("input[type=text]", ig)[0];
+			$.ajax({
+				type: "PUT",
+				url: "/todo/uid" + id,
+				data: {
+					done: checked.checked,
+					title: title.value
+				},
+				contentType: "application/json; charset=utf-8",
+				dataType: "json",
+				success: function(data) {
+					console.log(data);
+					if (data.done) {
+						$(title).addClass("done");
+					} else {
+						$(title).removeClass("done");
+					}
+				},
+				failure: function(err) {
+					// console.log(err);
+				}
+			});
+		}
+		$("#app input[type=text]").on("blur", changes);
+		$("#app input[type=checkbox]").on("change", changes);
+	});
+	</script>
+	<hr>
+	<div class="row">
+	</div>
+	<hr>
+</div>

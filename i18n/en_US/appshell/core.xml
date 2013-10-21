@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+	<generic_error_syntax>Error at line %s, file %s: %s </generic_error_syntax>
+	<file_not_found>No such file '%s'</file_not_found>
+	<class_not_found>No such class '%s' at file '%s'</class_not_found>
+	<method_not_found>No such method '%s' at class '%s'</method_not_found>
+	<execute_time_of>execute time of %s::%s is %s</execute_time_of>
+	<memory_usage>memory usage of %s::%s is %s bytes</memory_usage>
+	<cpu_usage>cpu usage of %s::%s is %s megacycles (feature not available yet)</cpu_usage>
+	<console>console</console>
+	<method_deprecated>this method %s is deprecated and shouldn't be used</method_deprecated>
+</errors>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<errors>
+	<connection_failed>cannot connect to database '%s' at host '%s'</connection_failed>
+</errors>

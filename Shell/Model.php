@@ -37,7 +37,8 @@ class Model {
 		$this->hash[$key] = $value;
 	}
 
-	public function __construct($class, $table, $local = null) {
+	public function __construct() {
+		$class = get_class($this);
 
 		$config	= new Config();
 
@@ -91,10 +92,14 @@ class Model {
 		$hash	= array_map(array($this, "quoteHash"), array_keys($this->hash));
 		$keys	= implode(", ", $hash);
 		$sql	= sprintf("INSERT INTO %s (%s) VALUES (%s)", $this->table, $keys, $values);
-		$this->connection->dbQuery($sql);
-		$this->hash["id"] = $this->connection->dbLastId(); #lol wut!?
-		$this->sql = $sql;
 		Log::write($sql);
+		$success = $this->connection->dbQuery($sql);
+		if ($success == false) {
+			Log::write(sprintf("FAILED SQL: %s", $this->connection->connection->error));
+			$this->repair($sql);
+		}
+		$this->hash["id"] = $this->connection->dbLastId();
+		$this->sql = $sql;
 
 		$this->fetch();
 	}
@@ -148,7 +153,7 @@ class Model {
 		$this->mdb = md5($sql);
 		$row = $memcache->get($this->mdb);
 		$this->sql = $sql;
-		
+
 		$config = new Config();
 		if ($config->get("dbMem") == 0) {
 			$row = false;
@@ -188,5 +193,75 @@ class Model {
 		Log::write($sql);
 		$this->connection->dbQuery($sql);
 		$this->sql = $sql;
+	}
+
+	private function repair($query) {
+		$config = Config::getInstance();
+		if ($config->development == false) {
+			return;
+		}
+		Log::write(sprintf("attemp repair %s", $this->table));
+
+		$error = $this->connection->connection->error;
+		$tde = explode(" ", $error);
+		if ($tde[0] == "Table" &&
+			$tde[2] == "doesn't" &&
+			$tde[3] == "exist") {
+			Log::write(sprintf("attemp creating table %s", $this->table));
+			$sql = <<<SQL
+CREATE TABLE %s (
+	id MEDIUMINT NOT NULL AUTO_INCREMENT,
+	created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	PRIMARY KEY (id)) ENGINE=%s DEFAULT CHARSET=%s;
+SQL;
+			Log::write(sprintf($sql, $this->table, $config->dbEngine, $config->dbCharset));
+			$this->connection->dbQuery(sprintf($sql, $this->table, $config->dbEngine, $config->dbCharset));
+			$this->connection->dbQuery($query);
+		}
+
+		$error = $this->connection->connection->error;
+		$tde = explode(" ", $error);
+		if ($tde[0] == "Unknown" &&
+			$tde[1] == "column") {
+
+			$backup = $this->hash;
+			$this->schema();
+			foreach ($this->hash as $key => $value) {
+				$attr = $this->$key;
+				if (isset($attr["sql"])) {
+					Log::write(sprintf("attemp change table %s to add field %s", $this->table, $key));
+					Log::write(sprintf($attr["sql"], $this->table, $key));
+					$this->connection->dbQuery(sprintf($attr["sql"], $this->table, $key));
+				}
+			}
+			$this->hash = $backup;
+			$this->connection->dbQuery($query);
+		}
+	}
+
+	public static function __callStatic($name, $args) {
+		$dict = [];
+		$dict["name"] = $name;
+
+		$sql = "";
+		if (isset($args[0])) {
+			$sql = sprintf("%s %s(%s)", $sql, strtoupper($name), $args[0]);
+		}
+
+		if (isset($args[1])) {
+			$default = $args[1];
+			if (!in_array($args[1], ["NULL", "NOT NULL", "CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"])) {
+				$default = sprintf('"%s"', $default);
+			}
+			$sql = sprintf("%s DEFAULT %s", $sql, $default);
+		}
+
+		if (isset($args[2])) {
+			$sql = sprintf("%s %s", $sql, $args[2]);
+		}
+
+		$dict["sql"] = sprintf("ALTER TABLE %s ADD COLUMN %s %s AFTER id;", "%s", "%s", $sql);
+		return $dict;
 	}
 }

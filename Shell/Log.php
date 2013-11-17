@@ -61,11 +61,11 @@ class Log {
 		return self::$id; 
 	}
 
-	public static function write($message, $level = self::DEBUG) {
+	public static function write($message, $level = self::INFO) {
 		$config = new Config();
 		$level = self::__levelToString($level);
 		self::$log[] = sprintf($config->get("logLineFormate"), date($config->get("logTimeFormate")), $level, $message);
-		syslog((int) $level, $message);
+		syslog(LOG_INFO, $message);
 	}
 
 	public static function __levelToString($level) {

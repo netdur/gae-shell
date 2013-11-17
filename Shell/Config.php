@@ -27,7 +27,7 @@ class Config {
 
 		ini_set("display_errors", "on");
 		libxml_use_internal_errors(true);
-		error_reporting(E_ALL | E_STRICT);
+		error_reporting(-1);
 		date_default_timezone_set("Africa/Casablanca");
 		set_error_handler(array("\Shell\AppException", "errorHandler"), E_ALL);
 
@@ -54,6 +54,7 @@ class Config {
 		self::$hash["staticSchema"] = "%s/static/%s.html";
 		self::$hash["dataSchema"] = "%s/data/%s.xml";
 		self::$hash["cache"] = "%s/cache/";
+		self::$hash["modelsDir"] = "%s/models/";
 
 		self::$hash["dbType"] = "mysql";
 		self::$hash["dbHost"] = "localhost";
@@ -62,6 +63,8 @@ class Config {
 		self::$hash["dbName"] = "";
 		self::$hash["dbPrefix"] = "";
 		self::$hash["dbMem"] = true;
+		self::$hash["dbCharset"] = "utf8";
+		self::$hash["dbEngine"] = "InnoDB";
 
 		self::$hash["salt"] = "#";
 		
@@ -80,6 +83,7 @@ class Config {
 		self::$hash["classDir"]	= sprintf(self::$hash["classDir"], self::$hash["path"]);
 
 		self::$hash["cache"] = sprintf(self::$hash["cache"], self::$hash["path"]);
+		self::$hash["modelsDir"] = sprintf(self::$hash["modelsDir"], self::$hash["path"]);
 
 		/**
 		 * App Engine
@@ -108,13 +112,14 @@ class Config {
 			self::$hash["curl"] = sprintf($url, self::$hash["url"], basename($_SERVER["SCRIPT_FILENAME"]));
 		}
 
-		self::$hash["address"] = sprintf("http%s://%s%s%s%s",
+		// self::$hash["address"] = sprintf("http%s://%s%s%s%s",
+		self::$hash["address"] = sprintf("http%s://%s%s%s",
 			(isset($_SERVER["HTTPS"]) && ($_SERVER["HTTPS"] == "on")) ? "s" : "",
 			(isset($_SERVER["PHP_AUTH_USER"]))
 				? sprintf("%s:%s@", $_SERVER["PHP_AUTH_USER"], $_SERVER["PHP_AUTH_PW"])
 				: "",
 			$_SERVER["SERVER_NAME"],
-			($_SERVER["SERVER_PORT"] != "80") ? sprintf(":%s", $_SERVER["SERVER_PORT"]) : "",
+			// ($_SERVER["SERVER_PORT"] != "80") ? sprintf(":%s", $_SERVER["SERVER_PORT"]) : "",
 			$_SERVER["REQUEST_URI"]
 		);
 		$pos = strpos(self::$hash["address"], "?");

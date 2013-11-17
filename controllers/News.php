@@ -7,7 +7,6 @@ use google\appengine\api\users\User;
 use google\appengine\api\users\UserService;
 
 Shell\App::import("View");
-Shell\App::import("Readability");
 
 class News {
 

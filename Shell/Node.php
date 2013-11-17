@@ -24,7 +24,7 @@ class Node {
 
 		if ($node instanceof \DOMNode) {
 			$this->item = $node;
-		} else if (file_exists($node)) {
+		} else if (strlen($node) < 2000 && file_exists($node)) {
 			$this->createFromFile($node);
 		} else if (is_string($node)) {
 			$this->create($node);

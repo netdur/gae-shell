@@ -9,19 +9,11 @@ class DBDriver {
 
 	public function __construct($dbHost, $dbUser, $dbPass, $dbName) {
 		$this->connection = new \mysqli($dbHost, $dbUser, $dbPass, $dbName);
-		if (mysqli_connect_errno()) {
-			Log::write(
-				sprintf("Connect Error (%s) %s", mysqli_connect_errno(), mysqli_connect_error())
-			);
-		}
 	}
 
 	public function dbQuery($sql) {
 		$this->result = $this->connection->query($sql);
-		if (mysqli_connect_errno()) {
-			Log::write(sprintf("%s: %s", mysqli_connect_errno(), mysqli_connect_error()), Log::ERR);
-			return false;
-		}
+		return $this->result;
 	}
 	
 	public function dbObject() {

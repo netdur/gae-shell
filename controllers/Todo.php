@@ -1,16 +1,5 @@
 <?php
 
-/**
-CREATE TABLE IF NOT EXISTS `tasks` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `owner` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
-  `title` varchar(250) COLLATE utf8_unicode_ci NOT NULL,
-  `done` tinyint(1) NOT NULL DEFAULT '0',
-  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-*/
-
 require_once 'google/appengine/api/users/User.php';
 require_once 'google/appengine/api/users/UserService.php';
 
@@ -18,7 +7,7 @@ use google\appengine\api\users\User;
 use google\appengine\api\users\UserService;
 
 Shell\App::import("View");
-Shell\App::import("Task", "tasks");
+Shell\App::import("Task");
 
 class Todo {
 

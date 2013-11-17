@@ -25,17 +25,6 @@ class Query {
 
 		$config = Config::getInstance();
 
-		if (in_array($table, $config->get("dbTables")) === false) {
-			return;
-		}
-
-		foreach ($config->get("dbTables") as $k => $v) {
-			if ($v == $table) {
-				$table = $k;
-				break;
-			}
-		}
-
 		$this->table = sprintf("%s%s", $config->get("dbPrefix"), $table);
 		$this->tables[] = $this->table;
 		$this->i18n = I18n::getInstance();
@@ -205,7 +194,7 @@ class Query {
 		Log::write($this->sql);
 
 		if ($this->connection->dbQuery($this->sql) === false) {
-			return false;
+			return [];
 		}
 
 		$this->cursor = false;

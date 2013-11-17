@@ -15,7 +15,7 @@ class App {
 	private static $imports = array();
 	public static $config = null;
 	private $isHTML = true;
-	private	$version = "0.7";
+	private	$version = "0.8";
 
 	function run($args) {
 
@@ -87,12 +87,6 @@ class App {
 			$config->get("mainMethod"),
 			(memory_get_usage() - $classMemoryUsage))
 		);
-		Log::write($i18n->getText("cpu_usage",
-			$config->get("mainClass"),
-			$config->get("mainMethod"),
-			"unknown")
-			//(memory_get_usage() - $classMemoryUsage))
-		);
 
 		if (isset($instance)) {
 			unset($instance);			
@@ -105,13 +99,16 @@ class App {
 					$selector = new Selector();
 					$console = $selector->query("#appshellConsole");
 					if ($console) {
-						foreach (Log::getLog() as $line) {
+						$logs = Log::getLog();
+						foreach ($logs as $line) {
 							$li = new Node("<li/>");
 							$li->setText($line);
 							$console->append($li);
 						}
-						$li = new Node("<li/>");
-						$li->setText(sprintf("request id: %s", Log::getId()));
+						$li = new Node("<li><a/></li>");
+						$li->query("a")
+								->setText(sprintf("request id: %s", Log::getId()))
+								->set("href", sprintf("/_ah/log/%s", Log::getId()));
 						$console->append($li);
 					}
 				}
@@ -122,15 +119,8 @@ class App {
 
 	}
 
-	public static function import($library, $table = null) {
-
-		$config = self::$config; // believe or not
-
-		// setup model if table != null
-		// App::import("users", "Users"); EQUAL import users as Users
-		if ($table != null) {
-			Config::mapTable($table, $library);
-		}
+	public static function import($library) {
+		$config = self::$config;
 
 		if (in_array($library, self::$imports)) {
 			return;
@@ -138,34 +128,19 @@ class App {
 			self::$imports[] = $library;
 		}
 
-		$core = array("Config", "AppException", "I18n", "Log", "Image", "URL", "Security",
-				"Debug", "Node", "Request", "Restful", "Selector", "View", "XPath", "Form", "Query");
+		$core = array("Config", "AppException", "I18n", "Log", "Image", "URL", "Security", "Debug", "Node", "Request", "Restful", "Selector", "View", "XPath", "Form", "Query");
 
 		if (in_array($library, $core)) {
-			// config class is not imported yet so I can't get phpExt value
 			return include_once(sprintf("%s.php", $library));
-		} else if (is_array($config->get("dbTables")) && in_array($library, $config->get("dbTables"))) {
-			self::importModel($library);
-		} else {
-			// assert that Config is already imported
-			$config = new Config();
-			return include_once(sprintf("%s%s%s", $config->get("classDir"), $library, $config->get("phpExt")));
 		}
-	}
 
-	private static function importModel($class) {
-		$config = new Config();
-		include_once("DBDrivers/mysql.php");
-		include_once("Model.php");
-		include_once("Query.php");
-		$key = null;
-		$table = null;
-		foreach ($config->get("dbTables") as $k => $v) {
-			if ($v == $class) {
-				$key = $k;
-				break;
-			}
+		if (file_exists(sprintf("%s%s.php", $config->modelsDir, $library))) {
+			include_once("DBDrivers/mysql.php");
+			include_once("Model.php");
+			include_once("Query.php");
+			return include_once(sprintf("%s%s.php", $config->modelsDir, $library));
 		}
-		eval('class '. $class .' extends Shell\Model { public function __construct($local = null) { parent::__construct("'. $key .'", $local);}}');
+
+		return include_once(sprintf("%s%s%s", $config->get("classDir"), $library, $config->get("phpExt")));
 	}
 }

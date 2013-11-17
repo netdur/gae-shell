@@ -43,9 +43,9 @@ class Todo {
 		$app = $view->query("#app .row");
 		
 		$q = Task::query();
-		$q->find(array(
+		$q->find([
 			"owner" => $user->getUserId()
-		));
+		]);
 		$tasks = $q->fetch();
 		foreach ($tasks as $task) {
 			$el = $markup->cloneNode();

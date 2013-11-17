@@ -15,6 +15,7 @@ class Index extends Shell\App {
 			"/api/1/tasks/(.*)" => "Tasks",
 
 			// pages
+			"/formex" => "FormEx",
 			"/news" => "News",
 			"/todo/uid(.*)" => "Todo",
 			"/todo" => "Todo",

@@ -128,7 +128,8 @@ class App {
 			self::$imports[] = $library;
 		}
 
-		$core = array("Config", "AppException", "I18n", "Log", "Image", "URL", "Security", "Debug", "Node", "Request", "Restful", "Selector", "View", "XPath", "Form", "Query");
+		$core = array("Config", "AppException", "I18n", "Log", "Image", "URL", "Security", "Debug", "Node", "Request", "Restful",
+				"Selector", "View", "XPath", "Form", "Query");
 
 		if (in_array($library, $core)) {
 			return include_once(sprintf("%s.php", $library));

@@ -75,9 +75,7 @@ class Config {
 			self::$hash[$key] = $value;
 		}
 
-		if (isset(self::$hash["secret"])) {
-			self::$hash["secret"] = sha1(sprintf("%s%s", $_SERVER["REMOTE_ADDR"], self::$hash["secret"]));
-		}
+		self::$hash["secret"] = sha1(sprintf("%s%s%s", $_SERVER["REMOTE_ADDR"], $_SERVER["HTTP_USER_AGENT"], self::$hash["salt"]));
 
 		self::$hash["classSchema"] .= self::$hash["phpExt"];
 		self::$hash["classDir"]	= sprintf(self::$hash["classDir"], self::$hash["path"]);

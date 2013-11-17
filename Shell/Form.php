@@ -35,6 +35,8 @@ class Form {
 
 	public function verify() {
 		$config = Config::getInstance();
+		$_POST = $_REQUEST;
+
 		foreach ($_FILES as $key => $value) {
 			$type = sprintf("input_%s", $key);
 			if (isset($_POST[$type])) {
@@ -51,6 +53,7 @@ class Form {
 				$this->hash[$key]["path"] = $file;
 			}
 		}
+
 		foreach ($_POST as $key => $value) {
 			$type = sprintf("input_%s", $key);
 			if (isset($_POST[$type])) {
@@ -95,6 +98,8 @@ class Form {
 				}
 			}
 		}
+
+
 	}
 
 	public function __set($key, $value) {
@@ -329,7 +334,7 @@ class Form {
 
 		$hidden = new Node("<input/>");
 		$hidden->set("type", "hidden");
-		$hidden->set("name", "secret");
+		$hidden->set("name", "_secret");
 		$hidden->set("value", $config->secret);
 		$dd->append($hidden);
 
